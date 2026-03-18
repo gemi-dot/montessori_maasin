@@ -1,5 +1,6 @@
 # Ignore Python virtual environment
 venv/
+venv311/
 
 # Ignore SQLite database
 db.sqlite3
@@ -11,3 +12,6 @@ __pycache__/
 
 # Ignore media files
 media/
+
+# Ignore zbar directory
+zbar/
