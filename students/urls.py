@@ -14,4 +14,6 @@ urlpatterns = [
 
     path('scanner/', views.scanner_page, name='scanner_page'),
     path('get-student/<str:barcode_id>/', views.get_student),
+
+    path('scan/<str:barcode_id>/', views.submit_scan, name='submit_scan'),
 ]

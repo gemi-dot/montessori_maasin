@@ -8,6 +8,11 @@ import json
 from .models import Student, Attendance
 from django.utils import timezone
 
+from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse
+from .models import Student, Attendance
+from django.utils.timezone import now
+
 # Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Student
@@ -182,4 +187,54 @@ def get_student(request, barcode_id):
 
 
 def scanner_page(request):
-    return render(request, 'students/scan.html')   
+    return render(request, 'students/scan.html')
+
+from django.http import JsonResponse
+from django.utils import timezone
+from .models import Student, Attendance
+
+def submit_scan(request, barcode_id):
+    try:
+        student = Student.objects.get(barcode_id=barcode_id)
+        today = timezone.now().date()
+
+        attendance, created = Attendance.objects.get_or_create(
+            student=student,
+            date=today
+        )
+
+        if not attendance.time_in:
+            attendance.time_in = timezone.now()
+            attendance.save()
+            status = "TIME IN"
+        elif not attendance.time_out:
+            attendance.time_out = timezone.now()
+            attendance.save()
+            status = "TIME OUT"
+        else:
+            status = "ALREADY RECORDED"
+
+        # ✅ Get today's attendance list
+        today_attendance = Attendance.objects.filter(date=today).select_related('student')
+
+        attendance_list = []
+        for a in today_attendance:
+            attendance_list.append({
+                'name': f"{a.student.first_name} {a.student.last_name}",
+                'status': "TIME OUT" if a.time_out else "TIME IN"
+            })
+
+        return JsonResponse({
+            "name": f"{student.first_name} {student.last_name}",
+            "status": status,
+            "barcode": student.barcode_id,
+            "photo": student.photo.url if student.photo else "",
+            "attendance_list": attendance_list   # ✅ NEW
+        })
+
+    except Student.DoesNotExist:
+        return JsonResponse({"error": "Student not found"})
+
+
+
+

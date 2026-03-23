@@ -1,49 +1,87 @@
 {% extends 'students/base.html' %}
 
 {% block content %}
+<div class="container mt-4">
+    <h3 class="mb-3">Scan Student QR Code</h3>
 
-<h2>Scan Student QR</h2>
+    <!-- Scanner container -->
+    <div id="reader" style="width:100%; max-width:500px; margin:auto;"></div>
 
-<div id="reader" style="width:300px;"></div>
+    <!-- Scan result display -->
+    <div id="result" class="mt-4"></div>
+  
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+<hr>
 
+<h4 class="mt-4">📋 Today's Attendance</h4>
+<ul id="attendance-list" class="list-group mt-2"></ul>
+
+
+
+
+</div>
+
+<!-- Include Html5Qrcode library -->
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
 const resultDiv = document.getElementById("result");
+const listDiv = document.getElementById("attendance-list");
 
 function onScanSuccess(decodedText) {
-    fetch(`/students/scan/${decodedText}/`)
+    fetch(`/students/scan/${encodeURIComponent(decodedText)}/`)
         .then(response => response.json())
         .then(data => {
 
-            if (data.error) {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        ${data.error}
-                    </div>`;
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="card shadow p-3 text-center">
-                        <h4>${data.name}</h4>
-                        <span class="badge bg-success">${data.status}</span>
-                    </div>`;
+            if(data.error){
+                resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                return;
             }
+
+            // ✅ Student card
+            let photoHtml = data.photo && data.photo !== ""
+                ? `<img src="${data.photo}" class="img-thumbnail mb-2" width="150">`
+                : `<img src="/media/student_photos/default.png" class="img-thumbnail mb-2" width="150">`;
+
+            resultDiv.innerHTML = `
+                <div class="card shadow text-center p-3">
+                    ${photoHtml}
+                    <h4>${data.name}</h4>
+                    <p>ID: ${data.barcode}</p>
+                    <span class="badge bg-success fs-5">${data.status}</span>
+                </div>
+            `;
+
+            // 🔊 sound
+            new Audio("https://www.soundjay.com/buttons/sounds/beep-01a.mp3").play();
+
+            // ✅ Update attendance list
+            listDiv.innerHTML = "";
+
+            data.attendance_list.forEach(item => {
+                let badge = item.status === "TIME OUT"
+                    ? "bg-danger"
+                    : "bg-primary";
+
+                listDiv.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between">
+                        ${item.name}
+                        <span class="badge ${badge}">${item.status}</span>
+                    </li>
+                `;
+            });
         });
 }
 
-// ✅ CAMERA ONLY (no upload, no buttons)
+// Start scanner
 const html5QrCode = new Html5Qrcode("reader");
 
 html5QrCode.start(
     { facingMode: "environment" },
-    {
-        fps: 10,
-        qrbox: 250
-    },
+    { fps: 10, qrbox: 250 },
     onScanSuccess
 );
-</script>
 
+
+</script>
 {% endblock %}
