@@ -15,3 +15,5 @@ media/
 
 # Ignore zbar directory
 zbar/
+echo "montessori_system/.git" >> .gitignore
+echo "zbar/.git" >> .gitignore

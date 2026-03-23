@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Scan QR Code</h1>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="qr_code_image" class="form-label">Upload QR Code Image</label>
+      <input type="file" class="form-control" id="qr_code_image" name="qr_code_image" accept="image/*" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
+  </form>
+{% endblock %}

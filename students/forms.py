@@ -10,8 +10,21 @@ class StudentForm(forms.ModelForm):
             'last_name',
             'dob',
             'barcode_id',
-            'status'
+            'status',
+            'status',
+            'photo'
         ]
-        widgets = {
-            'dob': forms.DateInput(attrs={'type': 'date'}),
-        }
+
+    widgets = {
+        'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+        'middle_name': forms.TextInput(attrs={'class': 'form-control'}),
+        'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+        'dob': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        'barcode_id': forms.TextInput(attrs={'class': 'form-control'}),
+        'status': forms.TextInput(attrs={'class': 'form-control'}),
+        'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+}
+
+
+
+
